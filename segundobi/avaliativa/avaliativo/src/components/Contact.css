@@ -1,0 +1,120 @@
+.contact-grid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: 0.85fr 1.15fr;
+  align-items: start;
+}
+
+.contact-copy h2 {
+  margin: 0 0 12px;
+  color: var(--text-h);
+}
+
+.contact-highlights {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.contact-highlights > div {
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
+}
+
+.contact-highlights strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-h);
+}
+
+.contact-form {
+  padding: 28px;
+  display: grid;
+  gap: 18px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.contact-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 14px 16px;
+  font: inherit;
+  color: var(--text-h);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.contact-form input.has-error,
+.contact-form textarea.has-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+}
+
+.contact-form small {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.form-submit {
+  width: 100%;
+}
+
+.form-feedback {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-weight: 600;
+}
+
+.form-feedback.success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #166534;
+}
+
+.form-feedback.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #991b1b;
+}
+
+.form-feedback.loading {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+}
+
+@media (max-width: 1024px) {
+  .contact-grid,
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
