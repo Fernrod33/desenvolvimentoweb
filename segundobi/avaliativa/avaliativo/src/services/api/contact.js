@@ -1,3 +1,4 @@
+﻿
 export const sendContactMessage = async (payload) => {
   const response = await fetch('/.netlify/functions/sendEmail', {
     method: 'POST',

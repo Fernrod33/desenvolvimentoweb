@@ -1,20 +1,17 @@
-import './Solutions.css'
+﻿import './Solutions.css'
 
 const solutionItems = [
   {
     title: 'Automação de captação',
     description: 'Fluxos claros de contato, CTAs consistentes e integração funcional com e-mail.',
-    accent: '01',
   },
   {
     title: 'Design de alta conversão',
     description: 'Hierarquia visual, contraste e blocos informativos para guiar a decisão do usuário.',
-    accent: '02',
   },
   {
     title: 'Escala pronta para campanha',
     description: 'Estrutura responsiva e modular para landing pages de produto, serviço ou sistema.',
-    accent: '03',
   },
 ]
 
@@ -51,7 +48,6 @@ const Solutions = () => {
           {solutionItems.map((item, index) => (
             <article className="solution-card" key={item.title}>
               <SolutionIcon index={index} />
-              <span className="solution-index">{item.accent}</span>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
             </article>

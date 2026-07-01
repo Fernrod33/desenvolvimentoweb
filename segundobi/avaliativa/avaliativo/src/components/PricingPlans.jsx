@@ -1,4 +1,4 @@
-import './PricingPlans.css'
+﻿import './PricingPlans.css'
 
 const pricingPlans = [
   {
@@ -42,17 +42,22 @@ const PricingPlans = () => {
           {pricingPlans.map((plan) => (
             <article className={`pricing-card ${plan.featured ? 'featured' : ''}`} key={plan.name}>
               {plan.featured ? <span className="featured-badge">Mais recomendado</span> : null}
+              
               <h3>{plan.name}</h3>
+              
               <div className="pricing-value">
                 <strong>{plan.price}</strong>
                 <span>{plan.period}</span>
               </div>
+              
               <p>{plan.description}</p>
+              
               <ul>
                 {plan.features.map((feature) => (
                   <li key={feature}>{feature}</li>
                 ))}
               </ul>
+              
               <a className={`button ${plan.featured ? 'button-primary' : 'button-secondary'}`} href="#contact">
                 {plan.cta}
               </a>

@@ -1,4 +1,4 @@
-import heroImage from '../assets/hero.png'
+﻿import heroImage from '../assets/hero.png'
 import './Hero.css'
 
 const Hero = ({ stats }) => {
@@ -7,7 +7,9 @@ const Hero = ({ stats }) => {
       <div className="container hero-grid">
         <div className="hero-copy">
           <span className="eyebrow">Plataforma completa para escalar operações</span>
+          
           <h1>Transforme atenção em conversão com uma landing page pensada para vender.</h1>
+          
           <p className="lead">
             Combine design premium, prova social, planos claros e um formulário funcional com envio de e-mail para
             captar leads com mais confiança.

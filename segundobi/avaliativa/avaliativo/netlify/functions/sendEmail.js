@@ -1,7 +1,10 @@
+﻿
 import nodemailer from 'nodemailer'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const recaptchaVerifyUrl = 'https://www.google.com/recaptcha/api/siteverify'
 
+// Cria uma resposta HTTP padronizada com status e corpo JSON.
 const createResponse = (statusCode, body) => ({
   statusCode,
   headers: {
@@ -10,6 +13,7 @@ const createResponse = (statusCode, body) => ({
   body: JSON.stringify(body),
 })
 
+// Faz o parse do corpo da requisicao e retorna null quando o JSON e invalido.
 const parseBody = (event) => {
   if (!event.body) return {}
 
@@ -20,37 +24,41 @@ const parseBody = (event) => {
   }
 }
 
+// Valida os campos recebidos e devolve erros junto dos dados sanitizados.
 const validatePayload = (payload) => {
   const errors = {}
   const name = String(payload?.name || '').trim()
   const email = String(payload?.email || '').trim()
   const subject = String(payload?.subject || '').trim()
   const message = String(payload?.message || '').trim()
+  const captchaToken = String(payload?.captchaToken || '').trim()
 
-  if (!name) errors.name = 'Nome é obrigatório.'
+  if (!name) errors.name = 'Nome Ã© obrigatÃ³rio.'
   if (!email) {
-    errors.email = 'E-mail é obrigatório.'
+    errors.email = 'E-mail Ã© obrigatÃ³rio.'
   } else if (!emailRegex.test(email)) {
-    errors.email = 'E-mail inválido.'
+    errors.email = 'E-mail invÃ¡lido.'
   }
-  if (!subject) errors.subject = 'Assunto é obrigatório.'
-  if (!message) errors.message = 'Mensagem é obrigatória.'
+  if (!subject) errors.subject = 'Assunto Ã© obrigatÃ³rio.'
+  if (!message) errors.message = 'Mensagem Ã© obrigatÃ³ria.'
   if (message && message.length < 10) errors.message = 'Mensagem deve ter ao menos 10 caracteres.'
+  if (!captchaToken) errors.captcha = 'Confirme o reCAPTCHA.'
 
   return {
     errors,
-    sanitized: { name, email, subject, message },
+    sanitized: { name, email, subject, message, captchaToken },
   }
 }
 
+// Handler principal da funcao serverless para validar e enviar o e-mail via SMTP.
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return createResponse(405, { message: 'Método não permitido.' })
+    return createResponse(405, { message: 'MÃ©todo nÃ£o permitido.' })
   }
 
   const payload = parseBody(event)
   if (payload === null) {
-    return createResponse(400, { message: 'Corpo da requisição inválido.' })
+    return createResponse(400, { message: 'Corpo da requisiÃ§Ã£o invÃ¡lido.' })
   }
 
   const { errors, sanitized } = validatePayload(payload)
@@ -71,7 +79,32 @@ export const handler = async (event) => {
   if (!host || !user || !pass || !to || !from) {
     return createResponse(500, {
       message:
-        'Configuração de e-mail ausente. Defina SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, CONTACT_TO e CONTACT_FROM.',
+        'ConfiguraÃ§Ã£o de e-mail ausente. Defina SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, CONTACT_TO e CONTACT_FROM.',
+    })
+  }
+
+  const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY
+  if (!recaptchaSecret) {
+    return createResponse(500, {
+      message:
+        'ConfiguraÃ§Ã£o do reCAPTCHA ausente. Defina RECAPTCHA_SECRET_KEY para validar o formulário.',
+    })
+  }
+
+  const captchaResponse = await fetch(recaptchaVerifyUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      secret: recaptchaSecret,
+      response: sanitized.captchaToken,
+    }),
+  }).then((response) => response.json())
+
+  if (!captchaResponse.success) {
+    return createResponse(400, {
+      message: 'Falha na validação do reCAPTCHA. Tente novamente.',
     })
   }
 

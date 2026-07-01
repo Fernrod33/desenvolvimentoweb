@@ -1,10 +1,18 @@
-import { useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import './Header.css'
 
 const Header = ({ navItems, ctaLabel }) => {
   const [menuOpen, setMenuOpen] = useState(false)
 
   const closeMenu = () => setMenuOpen(false)
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
 
   return (
     <header className="site-header">
@@ -29,7 +37,7 @@ const Header = ({ navItems, ctaLabel }) => {
           <span />
         </button>
 
-        <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} id="primary-navigation">
+        <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} id="primary-navigation" aria-hidden={!menuOpen}>
           {navItems.map((item) => (
             <a key={item.href} href={item.href} onClick={closeMenu}>
               {item.label}

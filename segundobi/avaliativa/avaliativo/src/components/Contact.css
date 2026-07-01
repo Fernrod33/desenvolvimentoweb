@@ -1,4 +1,4 @@
-.contact-grid {
+﻿.contact-grid {
   display: grid;
   gap: 22px;
   grid-template-columns: 0.85fr 1.15fr;
@@ -84,6 +84,22 @@
 .contact-form small {
   color: #dc2626;
   font-weight: 500;
+}
+
+.captcha-wrapper {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.captcha-wrapper iframe {
+  max-width: 100%;
+}
+
+.captcha-hint {
+  margin-top: 14px;
+  color: var(--text);
+  font-size: 0.95rem;
 }
 
 .form-submit {

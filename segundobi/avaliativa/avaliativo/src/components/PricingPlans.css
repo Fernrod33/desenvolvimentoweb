@@ -1,4 +1,4 @@
-.pricing-grid {
+﻿.pricing-grid {
   display: grid;
   gap: 22px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -65,7 +65,7 @@
 }
 
 .pricing-card li::before {
-  content: '•';
+  content: '\2022';
   margin-right: 10px;
   color: #6d28d9;
 }

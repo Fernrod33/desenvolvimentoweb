@@ -1,20 +1,53 @@
+﻿.testimonial-marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.testimonial-marquee::before,
+.testimonial-marquee::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 72px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.testimonial-marquee::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(247, 248, 252, 0.98), rgba(247, 248, 252, 0));
+}
+
+.testimonial-marquee::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(247, 248, 252, 0.98), rgba(247, 248, 252, 0));
+}
+
 .testimonial-track {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(320px, 1fr);
+  display: flex;
+  width: max-content;
   gap: 20px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scroll-snap-type: x proximity;
+  animation: testimonial-marquee 42s linear infinite;
+}
+
+.testimonial-marquee:hover .testimonial-track {
+  animation-play-state: paused;
+}
+
+.testimonial-group {
+  display: flex;
+  gap: 20px;
+  flex: 0 0 auto;
 }
 
 .testimonial-card {
+  flex: 0 0 clamp(280px, 34vw, 360px);
   padding: 28px;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(229, 231, 235, 0.9);
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
-  scroll-snap-align: start;
 }
 
 .testimonial-profile {
@@ -36,30 +69,40 @@
   font-weight: 800;
 }
 
-.carousel-controls {
-  display: flex;
-  gap: 10px;
+.testimonial-caption {
+  margin-top: 16px;
+  font-size: 0.95rem;
+  color: var(--text);
 }
 
-.icon-button {
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--text-h);
+@keyframes testimonial-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @media (max-width: 640px) {
+  .testimonial-card {
+    flex-basis: 84vw;
+  }
+
+  .testimonial-marquee::before,
+  .testimonial-marquee::after {
+    width: 36px;
+  }
+
   .testimonial-track {
-    grid-auto-columns: 88%;
+    animation-duration: 100s;
   }
+}
 
-  .carousel-controls {
-    align-self: stretch;
-  }
-
-  .icon-button {
-    flex: 1;
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-track {
+    animation: none;
+    transform: none;
   }
 }

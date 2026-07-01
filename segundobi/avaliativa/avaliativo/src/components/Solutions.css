@@ -1,4 +1,4 @@
-.solutions-grid {
+﻿.solutions-grid {
   display: grid;
   gap: 22px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -27,15 +27,6 @@
   width: 24px;
   height: 24px;
   fill: currentColor;
-}
-
-.solution-index {
-  display: inline-block;
-  margin: 18px 0 10px;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: #6d28d9;
 }
 
 .solution-card h3 {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { sendContactMessage } from '../services/api/contact'
 import './Contact.css'
 
@@ -9,24 +9,114 @@ const initialState = {
   message: '',
 }
 
+const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY
+const recaptchaScriptId = 'google-recaptcha-script'
+
 const Contact = () => {
   const [formData, setFormData] = useState(initialState)
   const [fieldErrors, setFieldErrors] = useState({})
   const [status, setStatus] = useState({ type: 'idle', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState('')
+  const captchaContainerRef = useRef(null)
+  const captchaWidgetIdRef = useRef(null)
+
+  useEffect(() => {
+    if (!recaptchaSiteKey || !captchaContainerRef.current) return undefined
+
+    let cancelled = false
+    let retryTimer = null
+
+    const renderCaptcha = () => {
+      if (cancelled || !window.grecaptcha?.render || !captchaContainerRef.current) return
+      if (captchaWidgetIdRef.current !== null) return
+
+      captchaWidgetIdRef.current = window.grecaptcha.render(captchaContainerRef.current, {
+        sitekey: recaptchaSiteKey,
+        callback: (token) => {
+          setCaptchaToken(token)
+          setFieldErrors((current) => ({ ...current, captcha: undefined }))
+        },
+        'expired-callback': () => {
+          setCaptchaToken('')
+        },
+        'error-callback': () => {
+          setStatus({
+            type: 'error',
+            message: 'Não foi possível carregar o reCAPTCHA. Recarregue a página e tente novamente.',
+          })
+        },
+      })
+    }
+
+    const ensureCaptchaReady = (attempt = 0) => {
+      if (cancelled) return
+
+      if (window.grecaptcha?.ready) {
+        window.grecaptcha.ready(() => {
+          if (cancelled) return
+          renderCaptcha()
+        })
+        return
+      }
+
+      if (attempt >= 20) {
+        setStatus({
+          type: 'error',
+          message: 'Não foi possível inicializar o reCAPTCHA. Recarregue a página e tente novamente.',
+        })
+        return
+      }
+
+      retryTimer = window.setTimeout(() => ensureCaptchaReady(attempt + 1), 200)
+    }
+
+    const existingScript = document.getElementById(recaptchaScriptId)
+
+    if (existingScript) {
+      if (window.grecaptcha) {
+        ensureCaptchaReady()
+      } else {
+        existingScript.addEventListener('load', ensureCaptchaReady)
+      }
+
+      return () => {
+        cancelled = true
+        if (retryTimer) window.clearTimeout(retryTimer)
+        existingScript.removeEventListener('load', ensureCaptchaReady)
+      }
+    }
+
+    const script = document.createElement('script')
+    script.id = recaptchaScriptId
+    script.src = 'https://www.google.com/recaptcha/api.js?render=explicit'
+    script.async = true
+    script.defer = true
+    script.onload = ensureCaptchaReady
+    document.head.appendChild(script)
+
+    return () => {
+      cancelled = true
+      if (retryTimer) window.clearTimeout(retryTimer)
+    }
+  }, [])
 
   const validate = () => {
     const nextErrors = {}
 
     if (!formData.name.trim()) nextErrors.name = 'Informe o nome.'
+    
     if (!formData.email.trim()) {
       nextErrors.email = 'Informe o e-mail.'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       nextErrors.email = 'Informe um e-mail válido.'
     }
+    
     if (!formData.subject.trim()) nextErrors.subject = 'Informe o assunto.'
+    
     if (!formData.message.trim()) nextErrors.message = 'Escreva sua mensagem.'
     if (formData.message.trim().length < 10) nextErrors.message = 'A mensagem deve ter ao menos 10 caracteres.'
+    if (!captchaToken) nextErrors.captcha = 'Confirme o reCAPTCHA antes de enviar.'
 
     return nextErrors
   }
@@ -39,6 +129,7 @@ const Contact = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    
     const nextErrors = validate()
     setFieldErrors(nextErrors)
 
@@ -51,8 +142,12 @@ const Contact = () => {
     setStatus({ type: 'loading', message: 'Enviando sua mensagem...' })
 
     try {
-      await sendContactMessage(formData)
+      await sendContactMessage({ ...formData, captchaToken })
       setFormData(initialState)
+      setCaptchaToken('')
+      if (window.grecaptcha && captchaWidgetIdRef.current !== null) {
+        window.grecaptcha.reset(captchaWidgetIdRef.current)
+      }
       setStatus({ type: 'success', message: 'Mensagem enviada com sucesso. Em breve entraremos em contato.' })
     } catch (error) {
       setStatus({
@@ -85,6 +180,12 @@ const Contact = () => {
               <span>Integração via Netlify Functions e SMTP.</span>
             </div>
           </div>
+
+          {recaptchaSiteKey ? null : (
+            <p className="captcha-hint">
+              Defina <strong>VITE_RECAPTCHA_SITE_KEY</strong> para ativar a proteção anti-spam do formulário.
+            </p>
+          )}
         </div>
 
         <form className="contact-form" onSubmit={handleSubmit} noValidate>
@@ -141,6 +242,11 @@ const Contact = () => {
             />
             {fieldErrors.message ? <small>{fieldErrors.message}</small> : null}
           </label>
+
+          <div className="captcha-wrapper">
+            <div ref={captchaContainerRef} />
+            {fieldErrors.captcha ? <small>{fieldErrors.captcha}</small> : null}
+          </div>
 
           <button type="submit" className="button button-primary form-submit" disabled={isSubmitting}>
             {isSubmitting ? 'Enviando...' : 'Enviar mensagem'}
